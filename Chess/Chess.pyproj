@@ -22,13 +22,31 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="src\bishop.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\board_piece.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\game.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\king.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="src\knight.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\main.py" />
+    <Compile Include="src\piece_collection.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="src\queen.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="src\rook.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\pawn.py">
       <SubType>Code</SubType>
     </Compile>

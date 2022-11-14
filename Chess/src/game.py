@@ -2,7 +2,7 @@
 import pygame
 from src.vector2 import Vector2
 from src.board_piece import BoardPiece
-from src.pawn import Pawn
+from src.piece_collection import *
 
 class Game:
 	square_size = 75
@@ -25,22 +25,20 @@ class Game:
 		self.active_sprite = None
 		self.highlight_moves = []
 
-		self.white_player = [
-			BoardPiece(Vector2(3, 7), "./sprites/white/queen.png"),
-			BoardPiece(Vector2(4, 7), "./sprites/white/king.png"),
-			*[BoardPiece(Vector2(i, 7), "./sprites/white/rook.png") for i in (0, 7)],
-			*[BoardPiece(Vector2(i, 7), "./sprites/white/bishop.png") for i in (1, 6)],
-			*[BoardPiece(Vector2(i, 7), "./sprites/white/knight.png") for i in (2, 5)],
-			*[Pawn(Vector2(i, 6), "./sprites/white/pawn.png") for i in range(8)]
-		]
-	
-		self.black_player = [
-			BoardPiece(Vector2(3, 0), "./sprites/black/queen.png"),
-			BoardPiece(Vector2(4, 0), "./sprites/black/king.png"),
-			*[BoardPiece(Vector2(i, 0), "./sprites/black/rook.png") for i in (0, 7)],
-			*[BoardPiece(Vector2(i, 0), "./sprites/black/bishop.png") for i in (1, 6)],
-			*[BoardPiece(Vector2(i, 0), "./sprites/black/knight.png") for i in (2, 5)],
-			*[Pawn(Vector2(i, 1), "./sprites/black/pawn.png", white=False) for i in range(8)]
+		self.players = [
+			Queen(Vector2(3, 7), "./sprites/white/queen.png"),
+			King(Vector2(4, 7), "./sprites/white/king.png"),
+			*[Rook(Vector2(i, 7), "./sprites/white/rook.png") for i in (0, 7)],
+			*[Bishop(Vector2(i, 7), "./sprites/white/bishop.png") for i in (1, 6)],
+			*[Knight(Vector2(i, 7), "./sprites/white/knight.png") for i in (2, 5)],
+			*[Pawn(Vector2(i, 6), "./sprites/white/pawn.png") for i in range(8)],
+			
+			Queen(Vector2(3, 0), "./sprites/black/queen.png"),
+			King(Vector2(4, 0), "./sprites/black/king.png"),
+			*[Rook(Vector2(i, 0), "./sprites/black/rook.png") for i in (0, 7)],
+			*[Bishop(Vector2(i, 0), "./sprites/black/bishop.png") for i in (1, 6)],
+			*[Knight(Vector2(i, 0), "./sprites/black/knight.png") for i in (2, 5)],
+			*[Pawn(Vector2(i, 1), "./sprites/black/pawn.png") for i in range(8)],
 		]
 
 	# handle events and input
@@ -58,34 +56,42 @@ class Game:
 						if pygame.Rect(move_pos.x, move_pos.y, Game.square_size, Game.square_size).collidepoint(event.pos):
 
 							# get active sprite
-							for sprite_list in (self.white_player, self.black_player):
-								for sprite in sprite_list:
-									if id(sprite) == self.active_sprite:
+							for sprite in self.players:
+								if id(sprite) == self.active_sprite:
 
-										# move the sprite
-										sprite.move_to(move)
-										self.is_player1_turn = not self.is_player1_turn
-										self.active_sprite = None
-										self.highlight_moves = []
-										return
+									# kill other sprite (if exists)
+									kill_target = self.get_from_posision(move)
+									if kill_target != None:
+										self.players.remove(kill_target)
+
+									# move the sprite
+									sprite.move_to(move)
+									self.is_player1_turn = not self.is_player1_turn
+									self.active_sprite = None
+									self.highlight_moves = []
+
+									return
 
 
 				# check if player has clicked a sprite
-				for sprite_list in (self.white_player, self.black_player):
-					for sprite in sprite_list:
-						sprite_pos = Game.grid_pos + sprite.pos * Vector2(75,75)
+				for sprite in self.players:
+
+					# ignore if sprite is on other team
+					if sprite.is_white != self.is_player1_turn:
+						continue
+
+					sprite_pos = Game.grid_pos + sprite.pos * Vector2(75,75)
 						
-						if pygame.Rect(sprite_pos.x, sprite_pos.y, Game.square_size, Game.square_size).collidepoint(event.pos):
+					if pygame.Rect(sprite_pos.x, sprite_pos.y, Game.square_size, Game.square_size).collidepoint(event.pos):
+
+						# set or remove as active sprite
+						self.active_sprite = id(sprite) if self.active_sprite != id(sprite) else None
 							
-							# set or remove as active sprite
-							self.active_sprite = id(sprite) if self.active_sprite != id(sprite) else None
-							
-							# get highlighted squares for active sprite
-							self.highlight_moves = []
-							for sprite_list in (self.white_player, self.black_player):
-								for sprite in sprite_list:
-									if self.active_sprite == id(sprite):
-										self.highlight_moves = sprite.get_moves(self)
+						# get highlighted squares for active sprite
+						self.highlight_moves = []
+						for sprite in self.players:
+							if self.active_sprite == id(sprite):
+								self.highlight_moves = sprite.get_moves(self)
 
 	# draw game board
 	def draw_grid(self) -> None:
@@ -127,17 +133,15 @@ class Game:
 			
 	# draw all sprites
 	def draw_sprites(self) -> None:
-		for sprite_list in (self.white_player, self.black_player):
-			for sprite in sprite_list:
-				pos = Game.grid_pos + sprite.pos * Vector2(Game.square_size, Game.square_size)
-				self.window.blit(sprite.surface, pos.get_tuple())
+		for sprite in self.players:
+			pos = Game.grid_pos + sprite.pos * Vector2(Game.square_size, Game.square_size)
+			self.window.blit(sprite.surface, pos.get_tuple())
 				
 
 	# get piece at position
 	def get_from_posision(self, target_pos: Vector2):
-		for sprite_list in (self.white_player, self.black_player):
-			for sprite in sprite_list:
-				if sprite.pos == target_pos:
-					return sprite
+		for sprite in self.players:
+			if sprite.pos == target_pos:
+				return sprite
 		return None
 
