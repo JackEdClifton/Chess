@@ -86,6 +86,11 @@ class Game:
 									if 1 + (not self.is_player1_turn) == player_in_check:
 										sprite.undo_move()
 										winsound.PlaySound("./audio/mixkit-wrong-electricity-buzz-955.wav", winsound.SND_FILENAME)
+
+										# if a sprite was removed during an illegal move, replace it
+										if kill_target != None:
+											self.players.append(kill_target)
+
 										return
 
 									# move is valid, complete transaction
@@ -142,7 +147,7 @@ class Game:
 				# draw square
 				pygame.draw.rect(self.window, self.board_colours[is_dark_square + is_highlighted_square*2], square_rect)
 				if is_highlighted_square:
-					pygame.draw.rect(self.window, (0,0,0), square_rect, 1)
+					pygame.draw.rect(self.window, (0,0,0), (square_pos.x+1, square_pos.y+1, Game.square_size-2, Game.square_size-2), 3)
 
 				# increment to next square
 				square_pos.x += Game.square_size
