@@ -6,6 +6,7 @@ from src.vector2 import Vector2
 class BoardPiece:
 	def __init__(self, pos: Vector2, img_path: str):
 		self.pos = pos
+		self.fallback_pos = pos
 		self.surface = pygame.transform.scale(pygame.image.load(img_path), (75, 75))
 		self.is_white = bool(img_path.count("white"))
 
@@ -19,8 +20,8 @@ class BoardPiece:
 		# list for valid moves
 		moves = []
 
-		# check for moves in y axis
-		for vel in range(1, 7):
+		# check for moves in axis
+		for vel in range(1, 8):
 			target_pos = self.pos + Vector2(vel*x_multiplier, vel*y_multiplier)
 
 			# check outside board
@@ -54,4 +55,9 @@ class BoardPiece:
 
 	# move the sprite
 	def move_to(self, pos):
+		self.fallback_pos = self.pos
 		self.pos = pos
+
+	# undo the move (used to stop check)
+	def undo_move(self):
+		self.pos = self.fallback_pos

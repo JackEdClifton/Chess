@@ -70,6 +70,7 @@
     <Content Include="sprite_sheet.png" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="audio\" />
     <Folder Include="src\" />
     <Folder Include="sprites\" />
     <Folder Include="sprites\black\" />

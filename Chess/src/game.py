@@ -1,5 +1,6 @@
 
 import pygame
+import winsound
 from src.vector2 import Vector2
 from src.board_piece import BoardPiece
 from src.piece_collection import *
@@ -26,15 +27,19 @@ class Game:
 		self.highlight_moves = []
 
 		self.players = [
-			Queen(Vector2(3, 7), "./sprites/white/queen.png"),
+			# kings
 			King(Vector2(4, 7), "./sprites/white/king.png"),
+			King(Vector2(4, 0), "./sprites/black/king.png"),
+
+			# white pieces
+			Queen(Vector2(3, 7), "./sprites/white/queen.png"),
 			*[Rook(Vector2(i, 7), "./sprites/white/rook.png") for i in (0, 7)],
 			*[Bishop(Vector2(i, 7), "./sprites/white/bishop.png") for i in (1, 6)],
 			*[Knight(Vector2(i, 7), "./sprites/white/knight.png") for i in (2, 5)],
 			*[Pawn(Vector2(i, 6), "./sprites/white/pawn.png") for i in range(8)],
 			
+			# black pieces
 			Queen(Vector2(3, 0), "./sprites/black/queen.png"),
-			King(Vector2(4, 0), "./sprites/black/king.png"),
 			*[Rook(Vector2(i, 0), "./sprites/black/rook.png") for i in (0, 7)],
 			*[Bishop(Vector2(i, 0), "./sprites/black/bishop.png") for i in (1, 6)],
 			*[Knight(Vector2(i, 0), "./sprites/black/knight.png") for i in (2, 5)],
@@ -57,6 +62,8 @@ class Game:
 
 							# get active sprite
 							for sprite in self.players:
+
+								# move sprite
 								if id(sprite) == self.active_sprite:
 
 									# kill other sprite (if exists)
@@ -66,11 +73,25 @@ class Game:
 
 									# move the sprite
 									sprite.move_to(move)
-									self.is_player1_turn = not self.is_player1_turn
 									self.active_sprite = None
 									self.highlight_moves = []
 
+									# check friendly check (moving a blocker)
+									player_in_check = 0
+									for each_sprite in self.players:
+										for move in each_sprite.get_moves(self):
+											if move == self.players[0].pos: player_in_check = 1
+											if move == self.players[1].pos: player_in_check = 2
+
+									if 1 + (not self.is_player1_turn) == player_in_check:
+										sprite.undo_move()
+										winsound.PlaySound("./audio/mixkit-wrong-electricity-buzz-955.wav", winsound.SND_FILENAME)
+										return
+
+									# move is valid, complete transaction
+									self.is_player1_turn = not self.is_player1_turn
 									return
+									
 
 
 				# check if player has clicked a sprite
