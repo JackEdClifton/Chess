@@ -1,0 +1,5 @@
+{
+	"online-mode": "server",
+	"port": 8085,
+	"server-ip":  "192.168.0.69"
+}

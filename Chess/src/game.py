@@ -1,9 +1,15 @@
 
 import pygame
 import winsound
+import requests
+import json
 from src.vector2 import Vector2
 from src.board_piece import BoardPiece
 from src.piece_collection import *
+
+# load config file
+with open("./conf/setup.json") as user_conf:
+  user_conf = json.load(user_conf)
 
 class Game:
 	square_size = 75
@@ -25,6 +31,7 @@ class Game:
 		self.is_player1_turn = True
 		self.active_sprite = None
 		self.highlight_moves = []
+		self.unprocessed_online_move = None
 
 		self.players = [
 			# kings
@@ -48,11 +55,21 @@ class Game:
 
 	# handle events and input
 	def handle_events(self):
+
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				self.run = False
 
 			if event.type == pygame.MOUSEBUTTONDOWN:
+
+				# ignore inputs if clients turn
+				if user_conf["online-mode"] == "server" and self.is_player1_turn:
+					continue
+
+				# ignore inputs if hosts turn
+				if user_conf["online-mode"] == "client" and not self.is_player1_turn:
+					continue
+
 
 				# check if player is moving a sprite
 				if self.active_sprite != None:
@@ -72,6 +89,7 @@ class Game:
 										self.players.remove(kill_target)
 
 									# move the sprite
+									sprite_starting_pos = sprite.pos
 									sprite.move_to(move)
 									self.active_sprite = None
 									self.highlight_moves = []
@@ -95,6 +113,14 @@ class Game:
 
 									# move is valid, complete transaction
 									self.is_player1_turn = not self.is_player1_turn
+
+									# if client, send move to host
+									if user_conf["online-mode"] == "client":
+										data = str("".join((str(sprite_starting_pos.x), str(sprite_starting_pos.y), str(sprite.pos.x), str(sprite.pos.y))))
+										ip = user_conf['server-ip']
+										port = user_conf['port']
+										requests.get(f"http://{ip}:{port}/send-move?data={data}")
+
 									return
 									
 
@@ -118,6 +144,18 @@ class Game:
 						for sprite in self.players:
 							if self.active_sprite == id(sprite):
 								self.highlight_moves = sprite.get_moves(self)
+
+
+	# handle sending and recieving multiplayer moves
+	def handle_online_events(self):
+		
+		# exit if online mode is disabled
+		if user_conf["online-mode"] == "offline":
+			return
+
+		# if client, send move to host
+
+
 
 	# draw game board
 	def draw_grid(self) -> None:

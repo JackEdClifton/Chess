@@ -55,6 +55,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="conf\setup.json" />
     <Content Include="sprites\black\bishop.png" />
     <Content Include="sprites\black\king.png" />
     <Content Include="sprites\black\knight.png" />
@@ -71,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="audio\" />
+    <Folder Include="conf\" />
     <Folder Include="src\" />
     <Folder Include="sprites\" />
     <Folder Include="sprites\black\" />
