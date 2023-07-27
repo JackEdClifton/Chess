@@ -4,7 +4,6 @@ import winsound
 import requests
 import socket
 import threading
-import time
 from src.vector2 import Vector2
 from src.piece_collection import *
 from src.user_conf import user_conf
@@ -55,7 +54,6 @@ class Game:
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.connect((user_conf["server-ip"], user_conf["port"]))
 		self.client_player = int(self.sock.recv(1024).decode())
-		time.sleep(0.2)
 		threading.Thread(target=self.din).start()
 
 	# handle network input
@@ -68,12 +66,17 @@ class Game:
 			start_pos = data[:2]
 			end_pos = data[2:]
 
+			# kill other sprite (if exists)
+			kill_target = self.get_from_posision(Vector2(*(int(i) for i in list(end_pos))))
+			if kill_target != None:
+				self.players.remove(kill_target)
+
 			# move piece
 			print("Moving piece from server")
 			for player in self.players:
 				if player.pos == Vector2(*(int(i) for i in list(start_pos))):
-					print("Piece Moved from server")
 					player.move_to(Vector2(*(int(i) for i in list(end_pos))))
+					self.is_player1_turn = not self.is_player1_turn
 
 
 	# handle events and input
