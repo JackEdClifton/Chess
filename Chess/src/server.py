@@ -2,7 +2,7 @@
 import socket
 import json
 import threading
-from src.game import Game
+#from src.game import Game
 from src.vector2 import Vector2
 from src.piece_collection import *
 from src.user_conf import user_conf
