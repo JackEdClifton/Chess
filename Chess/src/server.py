@@ -39,7 +39,6 @@ class GameHandler:
 
 	def gameloop(self):
 		while True:
-			print("awaiting input")
 
 			if self.is_player1_turn: sock = self.sock1
 			else: sock = self.sock2
@@ -49,8 +48,6 @@ class GameHandler:
 			# process data
 			start_pos = data[:2]
 			end_pos = data[2:]
-			print(start_pos)
-			print(end_pos)
 
 			# move piece
 			for player in self.players:
@@ -66,11 +63,6 @@ class GameHandler:
 
 			self.is_player1_turn = not self.is_player1_turn
 
-
-# listen for 2 connections
-# create server instance
-# listen for input
-# reshare board
 
 def create_connection(sock):
 	sock.listen()

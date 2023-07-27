@@ -50,18 +50,28 @@ class Game:
 			*[Pawn(Vector2(i, 1), "./sprites/black/pawn.png") for i in range(8)],
 		]
 
+		title = "Offline"
+
 		# init conn
-		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.sock.connect((user_conf["server-ip"], user_conf["port"]))
-		self.client_player = int(self.sock.recv(1024).decode())
-		threading.Thread(target=self.din).start()
+		if user_conf["online-mode"] == "server":
+			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			self.sock.connect((user_conf["server-ip"], user_conf["port"]))
+			self.client_player = int(self.sock.recv(1024).decode())
+			threading.Thread(target=self.din).start()
+
+			title = "Your Turn" if self.client_player == self.is_player1_turn else "Opponents Turn"
+		pygame.display.set_caption("Chess - " + title)
 
 	# handle network input
 	def din(self):
 		while True:
-			print("Awaiting input from server")
 			data = self.sock.recv(1024).decode()
-			print(data)
+
+			if not data:
+				print("CONNECTION CLOSED")
+				self.sock.close()
+				self.run = False
+
 			# process data
 			start_pos = data[:2]
 			end_pos = data[2:]
@@ -72,11 +82,13 @@ class Game:
 				self.players.remove(kill_target)
 
 			# move piece
-			print("Moving piece from server")
 			for player in self.players:
 				if player.pos == Vector2(*(int(i) for i in list(start_pos))):
 					player.move_to(Vector2(*(int(i) for i in list(end_pos))))
 					self.is_player1_turn = not self.is_player1_turn
+					
+					title = "Your Turn" if self.client_player == self.is_player1_turn else "Opponents Turn"
+					pygame.display.set_caption("Chess - " + title)
 
 
 	# handle events and input
@@ -135,9 +147,10 @@ class Game:
 
 									# move is valid, complete transaction
 									self.is_player1_turn = not self.is_player1_turn
+									title = "Your Turn" if self.client_player == self.is_player1_turn else "Opponents Turn"
+									pygame.display.set_caption("Chess - " + title)
 
 									# send move to host
-									print("SendingDataToHost")
 									self.sock.sendall(
 										str("".join((str(sprite_starting_pos.x), str(sprite_starting_pos.y), str(sprite.pos.x), str(sprite.pos.y)))).encode()
 									)
