@@ -2,6 +2,7 @@
 import socket
 import json
 import threading
+import pickle
 from src.vector2 import Vector2
 from src.piece_collection import *
 from src.user_conf import user_conf
@@ -23,17 +24,24 @@ class GameHandler:
 			# white pieces
 			Queen(Vector2(3, 7), "./sprites/white/queen.png"),
 			*[Rook(Vector2(i, 7), "./sprites/white/rook.png") for i in (0, 7)],
-			*[Bishop(Vector2(i, 7), "./sprites/white/bishop.png") for i in (1, 6)],
-			*[Knight(Vector2(i, 7), "./sprites/white/knight.png") for i in (2, 5)],
+			*[Bishop(Vector2(i, 7), "./sprites/white/bishop.png") for i in (2, 5)],
+			*[Knight(Vector2(i, 7), "./sprites/white/knight.png") for i in (1, 6)],
 			*[Pawn(Vector2(i, 6), "./sprites/white/pawn.png") for i in range(8)],
 			
 			# black pieces
 			Queen(Vector2(3, 0), "./sprites/black/queen.png"),
 			*[Rook(Vector2(i, 0), "./sprites/black/rook.png") for i in (0, 7)],
-			*[Bishop(Vector2(i, 0), "./sprites/black/bishop.png") for i in (1, 6)],
-			*[Knight(Vector2(i, 0), "./sprites/black/knight.png") for i in (2, 5)],
+			*[Bishop(Vector2(i, 0), "./sprites/black/bishop.png") for i in (2, 5)],
+			*[Knight(Vector2(i, 0), "./sprites/black/knight.png") for i in (1, 6)],
 			*[Pawn(Vector2(i, 1), "./sprites/black/pawn.png") for i in range(8)],
 		]
+
+		import sys
+		data = pickle.dumps(self.players)
+		print("Size: " + sys.getsizeof(data))
+
+		self.sock1.sendall(data)
+		self.sock2.sendall(data)
 		
 		threading.Thread(target=self.gameloop).start()
 
