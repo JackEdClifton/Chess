@@ -1,5 +1,5 @@
 {
 	"online-mode": "client",
-	"port": 8069,
+	"port": 8085,
 	"server-ip":  "82.41.3.239"
 }

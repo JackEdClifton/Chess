@@ -3,6 +3,7 @@ import pygame
 import winsound
 import requests
 import socket
+import threading
 from src.vector2 import Vector2
 from src.piece_collection import *
 from src.user_conf import user_conf
@@ -32,6 +33,7 @@ class Game:
 		# init conn
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.connect((user_conf["server-ip"], user_conf["port"]))
+		threading.Thread(target=self.din).start()
 
 		self.players = [
 			# kings
@@ -53,6 +55,21 @@ class Game:
 			*[Pawn(Vector2(i, 1), "./sprites/black/pawn.png") for i in range(8)],
 		]
 
+	# handle network input
+	def din(self):
+		while True:
+			data = self.sock.recv(1024).decode()
+			
+			# process data
+			start_pos = data[:2]
+			end_pos = data[2:]
+
+			# move piece
+			for player in self.players:
+				if player.pos == Vector2([int(i) for i in start_pos.split()]):
+					player.move_to(Vector2([int(i) for i in end_pos.split()]))
+
+
 	# handle events and input
 	def handle_events(self):
 
@@ -63,8 +80,8 @@ class Game:
 			if event.type == pygame.MOUSEBUTTONDOWN:
 
 				# ignore inputs if other players turn
-				if user_conf["online-mode"] == "server" and self.is_player1_turn: continue
-				if user_conf["online-mode"] == "client" and not self.is_player1_turn: continue
+				#if user_conf["online-mode"] == "server" and self.is_player1_turn: continue
+				#if user_conf["online-mode"] == "client" and not self.is_player1_turn: continue
 
 
 				# check if player is moving a sprite
@@ -111,6 +128,7 @@ class Game:
 									self.is_player1_turn = not self.is_player1_turn
 
 									# send move to host
+									print("SendingDataToHost")
 									self.sock.sendall(
 										str("".join((str(sprite_starting_pos.x), str(sprite_starting_pos.y), str(sprite.pos.x), str(sprite.pos.y)))).encode()
 									)
