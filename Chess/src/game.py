@@ -4,6 +4,7 @@ import winsound
 import requests
 import socket
 import threading
+import time
 from src.vector2 import Vector2
 from src.piece_collection import *
 from src.user_conf import user_conf
@@ -30,12 +31,6 @@ class Game:
 		self.highlight_moves = []
 		self.unprocessed_online_move = None
 
-		# init conn
-		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.sock.connect((user_conf["server-ip"], user_conf["port"]))
-		self.client_player = bool(self.sock.recv(1024).decode())
-		threading.Thread(target=self.din).start()
-
 		self.players = [
 			# kings
 			King(Vector2(4, 7), "./sprites/white/king.png"),
@@ -56,12 +51,19 @@ class Game:
 			*[Pawn(Vector2(i, 1), "./sprites/black/pawn.png") for i in range(8)],
 		]
 
+		# init conn
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.sock.connect((user_conf["server-ip"], user_conf["port"]))
+		self.client_player = int(self.sock.recv(1024).decode())
+		time.sleep(0.2)
+		threading.Thread(target=self.din).start()
+
 	# handle network input
 	def din(self):
 		while True:
 			print("Awaiting input from server")
 			data = self.sock.recv(1024).decode()
-			
+			print(data)
 			# process data
 			start_pos = data[:2]
 			end_pos = data[2:]

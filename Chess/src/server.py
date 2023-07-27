@@ -2,7 +2,6 @@
 import socket
 import json
 import threading
-#from src.game import Game
 from src.vector2 import Vector2
 from src.piece_collection import *
 from src.user_conf import user_conf
@@ -81,7 +80,7 @@ def create_connection(sock):
 	sock1.sendall(b"1")
 
 	sock2, addr2 = sock.accept()
-	sock1.sendall(b"0")
+	sock2.sendall(b"0")
 
 	print("Accepted Clients")
 
