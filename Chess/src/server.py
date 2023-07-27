@@ -63,9 +63,9 @@ def create_connection():
 	sock1, addr1 = sock.accept()
 	sock2, addr2 = sock.accept()
 
-	print("Accepted Client")
+	print("Accepted Clients")
 
-	return GameHandler(sock1, sock1, conn2, addr2)
+	return GameHandler(sock1, addr1, sock2, addr2)
 
 
 def play_game(conn):
