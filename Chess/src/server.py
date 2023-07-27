@@ -54,9 +54,7 @@ class GameHandler:
 # listen for input
 # reshare board
 
-def create_connection():
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.bind(("0.0.0.0", user_conf["port"]))
+def create_connection(sock):
 	sock.listen()
 	
 	# listen for connections
@@ -75,8 +73,11 @@ def play_game(conn):
 	
 
 def main():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.bind(("0.0.0.0", user_conf["port"]))
+
 	while True:
-		game = create_connection()
+		game = create_connection(sock)
 		threading.Thread(target=play_game, args=(game)).start()
 	
 main()
