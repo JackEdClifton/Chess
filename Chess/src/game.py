@@ -31,7 +31,7 @@ class Game:
 
 		# init conn
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.sock.connect(("82.41.3.239", 8085))
+		self.sock.connect((user_conf["server-ip"], user_conf["port"]))
 
 		self.players = [
 			# kings
