@@ -65,6 +65,7 @@ class GameHandler:
 
 			sock.sendall(data.encode())
 
+			self.is_player1_turn = not self.is_player1_turn
 
 
 # listen for 2 connections
@@ -77,7 +78,10 @@ def create_connection(sock):
 	
 	# listen for connections
 	sock1, addr1 = sock.accept()
+	sock1.sendall(b"1")
+
 	sock2, addr2 = sock.accept()
+	sock1.sendall(b"0")
 
 	print("Accepted Clients")
 

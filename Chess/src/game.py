@@ -33,6 +33,7 @@ class Game:
 		# init conn
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.connect((user_conf["server-ip"], user_conf["port"]))
+		self.client_player = bool(self.sock.recv(1024).decode())
 		threading.Thread(target=self.din).start()
 
 		self.players = [
@@ -58,6 +59,7 @@ class Game:
 	# handle network input
 	def din(self):
 		while True:
+			print("Awaiting input from server")
 			data = self.sock.recv(1024).decode()
 			
 			# process data
@@ -65,9 +67,11 @@ class Game:
 			end_pos = data[2:]
 
 			# move piece
+			print("Moving piece from server")
 			for player in self.players:
-				if player.pos == Vector2([int(i) for i in start_pos.split()]):
-					player.move_to(Vector2([int(i) for i in end_pos.split()]))
+				if player.pos == Vector2(*(int(i) for i in list(start_pos))):
+					print("Piece Moved from server")
+					player.move_to(Vector2(*(int(i) for i in list(end_pos))))
 
 
 	# handle events and input
@@ -80,8 +84,8 @@ class Game:
 			if event.type == pygame.MOUSEBUTTONDOWN:
 
 				# ignore inputs if other players turn
-				#if user_conf["online-mode"] == "server" and self.is_player1_turn: continue
-				#if user_conf["online-mode"] == "client" and not self.is_player1_turn: continue
+				if user_conf["online-mode"] == "server":
+					if self.client_player != self.is_player1_turn: continue
 
 
 				# check if player is moving a sprite
