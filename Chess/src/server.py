@@ -36,18 +36,36 @@ class GameHandler:
 			*[Pawn(Vector2(i, 1), "./sprites/black/pawn.png") for i in range(8)],
 		]
 		
-		threading.Thread(target=self.din, args=(self.sock1)).start()
-		threading.Thread(target=self.din, args=(self.sock2)).start()
+		threading.Thread(target=self.gameloop).start()
 
-	def din(self, sock):
+	def gameloop(self):
 		while True:
-			data = sock.recv(1024)
+			print("awaiting input")
+
+			if self.is_player1_turn: sock = self.sock1
+			else: sock = self.sock2
+			
+			data = sock.recv(1024).decode()
+			
 			# process data
-			print(data)
+			start_pos = data[:2]
+			end_pos = data[2:]
+			print(start_pos)
+			print(end_pos)
+
+			# move piece
+			for player in self.players:
+				if player.pos == Vector2(*(int(i) for i in list(start_pos))):
+					player.move_to(Vector2(*(int(i) for i in list(end_pos))))
 
 
-	def dout(self):
-		pass
+			# tell other player
+			if self.is_player1_turn: sock = self.sock2
+			else: sock = self.sock1
+
+			sock.sendall(data.encode())
+
+
 
 # listen for 2 connections
 # create server instance
@@ -64,11 +82,6 @@ def create_connection(sock):
 	print("Accepted Clients")
 
 	return GameHandler(sock1, addr1, sock2, addr2)
-
-
-def play_game(conn):
-	while True:
-		data = conn.conn1.recv(1024)
 		
 	
 
@@ -76,9 +89,10 @@ def main():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.bind(("0.0.0.0", user_conf["port"]))
 
+	games = []
+
 	while True:
-		game = create_connection(sock)
-		threading.Thread(target=play_game, args=(game)).start()
+		games.append(create_connection(sock))
 	
 main()
 
