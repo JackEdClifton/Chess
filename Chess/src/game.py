@@ -2,14 +2,10 @@
 import pygame
 import winsound
 import requests
-import json
+import socket
 from src.vector2 import Vector2
-from src.board_piece import BoardPiece
 from src.piece_collection import *
-
-# load config file
-with open("./conf/setup.json") as user_conf:
-  user_conf = json.load(user_conf)
+from src.user_conf import user_conf
 
 class Game:
 	square_size = 75
@@ -32,6 +28,10 @@ class Game:
 		self.active_sprite = None
 		self.highlight_moves = []
 		self.unprocessed_online_move = None
+
+		# init conn
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.sock.connect(("82.41.3.239", 8085))
 
 		self.players = [
 			# kings
@@ -62,13 +62,9 @@ class Game:
 
 			if event.type == pygame.MOUSEBUTTONDOWN:
 
-				# ignore inputs if clients turn
-				if user_conf["online-mode"] == "server" and self.is_player1_turn:
-					continue
-
-				# ignore inputs if hosts turn
-				if user_conf["online-mode"] == "client" and not self.is_player1_turn:
-					continue
+				# ignore inputs if other players turn
+				if user_conf["online-mode"] == "server" and self.is_player1_turn: continue
+				if user_conf["online-mode"] == "client" and not self.is_player1_turn: continue
 
 
 				# check if player is moving a sprite
@@ -114,12 +110,10 @@ class Game:
 									# move is valid, complete transaction
 									self.is_player1_turn = not self.is_player1_turn
 
-									# if client, send move to host
-									if user_conf["online-mode"] == "client":
-										data = str("".join((str(sprite_starting_pos.x), str(sprite_starting_pos.y), str(sprite.pos.x), str(sprite.pos.y))))
-										ip = user_conf['server-ip']
-										port = user_conf['port']
-										requests.get(f"http://{ip}:{port}/send-move?data={data}")
+									# send move to host
+									self.sock.sendall(
+										str("".join((str(sprite_starting_pos.x), str(sprite_starting_pos.y), str(sprite.pos.x), str(sprite.pos.y)))).encode()
+									)
 
 									return
 									
@@ -144,16 +138,6 @@ class Game:
 						for sprite in self.players:
 							if self.active_sprite == id(sprite):
 								self.highlight_moves = sprite.get_moves(self)
-
-
-	# handle sending and recieving multiplayer moves
-	def handle_online_events(self):
-		
-		# exit if online mode is disabled
-		if user_conf["online-mode"] == "offline":
-			return
-
-		# if client, send move to host
 
 
 

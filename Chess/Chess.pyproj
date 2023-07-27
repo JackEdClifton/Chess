@@ -5,7 +5,7 @@
     <ProjectGuid>7fd28197-8581-446b-9fa4-0df935b9cb88</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>src\main.py</StartupFile>
+    <StartupFile>src\client.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -37,7 +37,7 @@
     <Compile Include="src\knight.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="src\main.py" />
+    <Compile Include="src\client.py" />
     <Compile Include="src\piece_collection.py">
       <SubType>Code</SubType>
     </Compile>
@@ -48,6 +48,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\pawn.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="src\server.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="src\user_conf.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\vector2.py">

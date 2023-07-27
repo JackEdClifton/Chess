@@ -1,3 +1,4 @@
+from src.board_piece import BoardPiece
 from src.pawn import Pawn
 from src.rook import Rook
 from src.bishop import Bishop
