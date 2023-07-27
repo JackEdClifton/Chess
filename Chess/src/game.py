@@ -30,25 +30,7 @@ class Game:
 		self.highlight_moves = []
 		self.unprocessed_online_move = None
 
-		self.players = [
-			# kings
-			King(Vector2(4, 7), "./sprites/white/king.png"),
-			King(Vector2(4, 0), "./sprites/black/king.png"),
-
-			# white pieces
-			Queen(Vector2(3, 7), "./sprites/white/queen.png"),
-			*[Rook(Vector2(i, 7), "./sprites/white/rook.png") for i in (0, 7)],
-			*[Bishop(Vector2(i, 7), "./sprites/white/bishop.png") for i in (1, 6)],
-			*[Knight(Vector2(i, 7), "./sprites/white/knight.png") for i in (2, 5)],
-			*[Pawn(Vector2(i, 6), "./sprites/white/pawn.png") for i in range(8)],
-			
-			# black pieces
-			Queen(Vector2(3, 0), "./sprites/black/queen.png"),
-			*[Rook(Vector2(i, 0), "./sprites/black/rook.png") for i in (0, 7)],
-			*[Bishop(Vector2(i, 0), "./sprites/black/bishop.png") for i in (1, 6)],
-			*[Knight(Vector2(i, 0), "./sprites/black/knight.png") for i in (2, 5)],
-			*[Pawn(Vector2(i, 1), "./sprites/black/pawn.png") for i in range(8)],
-		]
+		self.players = []
 
 		title = "Offline"
 
@@ -57,6 +39,7 @@ class Game:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.sock.connect((user_conf["server-ip"], user_conf["port"]))
 			self.client_player = int(self.sock.recv(1024).decode())
+			self.players = pickle.loads(self.sock.recv(1024))
 			threading.Thread(target=self.din).start()
 
 			title = "Your Turn" if self.client_player == self.is_player1_turn else "Opponents Turn"
