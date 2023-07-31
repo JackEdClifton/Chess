@@ -13,61 +13,36 @@ class GameHandler:
 		self.addr1 = addr1
 		self.sock2 = sock2
 		self.addr2 = addr2
-
 		self.is_player1_turn = True
-
-		self.players = [
-			# kings
-			King(Vector2(4, 7), "./sprites/white/king.png"),
-			King(Vector2(4, 0), "./sprites/black/king.png"),
-
-			# white pieces
-			Queen(Vector2(3, 7), "./sprites/white/queen.png"),
-			*[Rook(Vector2(i, 7), "./sprites/white/rook.png") for i in (0, 7)],
-			*[Bishop(Vector2(i, 7), "./sprites/white/bishop.png") for i in (2, 5)],
-			*[Knight(Vector2(i, 7), "./sprites/white/knight.png") for i in (1, 6)],
-			*[Pawn(Vector2(i, 6), "./sprites/white/pawn.png") for i in range(8)],
-			
-			# black pieces
-			Queen(Vector2(3, 0), "./sprites/black/queen.png"),
-			*[Rook(Vector2(i, 0), "./sprites/black/rook.png") for i in (0, 7)],
-			*[Bishop(Vector2(i, 0), "./sprites/black/bishop.png") for i in (2, 5)],
-			*[Knight(Vector2(i, 0), "./sprites/black/knight.png") for i in (1, 6)],
-			*[Pawn(Vector2(i, 1), "./sprites/black/pawn.png") for i in range(8)],
-		]
-
-		import sys
-		data = pickle.dumps(self.players)
-		print("Size: " + sys.getsizeof(data))
-
-		self.sock1.sendall(data)
-		self.sock2.sendall(data)
-		
 		threading.Thread(target=self.gameloop).start()
 
 	def gameloop(self):
 		while True:
 
-			if self.is_player1_turn: sock = self.sock1
-			else: sock = self.sock2
+			# select socket to listen for
+			if self.is_player1_turn:
+				sock = self.sock1
+			else:
+				sock = self.sock2
 			
-			data = sock.recv(1024).decode()
-			
-			# process data
-			start_pos = data[:2]
-			end_pos = data[2:]
+			# recieve data
+			data = sock.recv(1024)
 
-			# move piece
-			for player in self.players:
-				if player.pos == Vector2(*(int(i) for i in list(start_pos))):
-					player.move_to(Vector2(*(int(i) for i in list(end_pos))))
+			# close connection
+			if not data:
+				self.sock1.close()
+				self.sock2.close()
+				break
 
-
+						
 			# tell other player
-			if self.is_player1_turn: sock = self.sock2
-			else: sock = self.sock1
+			if self.is_player1_turn:
+				sock = self.sock2
+			else:
+				sock = self.sock1
 
-			sock.sendall(data.encode())
+			# send response
+			sock.sendall(data)
 
 			self.is_player1_turn = not self.is_player1_turn
 
